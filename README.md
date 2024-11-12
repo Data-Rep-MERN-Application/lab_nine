@@ -4,21 +4,21 @@ This lab focuses on adding delete functionality to a MERN (MongoDB, Express.js, 
 
 ## Instructions
 
-1. **Create a Git Repository**
-   - Create a Git repository for your solutions to this problem sheet.
-   - Push the repository to GitHub, and make a commit after each exercise.
+1. **Commit and push each solution to GitHub after completing an exercise.**
+  
 
-   ### Solution
+2. **React Application Setup**
+   - If you haven’t completed the previous lab, clone the React application from GitHub:
+     ```bash
+     git clone https://github.com/Data-Rep-MERN-Application/lab_eight
+     ```
+   - Install project dependencies:
+     ```bash
+     cd lab_eight
+     npm install
+     ```
 
-   ```bash
-   ~/Desktop > mkdir answers-curl
-   ~/Desktop > cd answers-curl
-   ~/Desktop/answers-curl(branch:master) > touch README.md
-   ~/Desktop/answers-curl > git init
-   Initialized empty Git repository in /Users/martin/Desktop/answers-curl/.git/
-   ~/Desktop/answers-curl(branch:master*) > git add .
-   ~/Desktop/answers-curl(branch:master*) > git commit -m "Empty first commit."
-   ```
+---
 
 2. **Set Up the Application**
    - In the previous lab, you configured a React application to perform CRUD (Create, Read, Update, Delete) operations, including creating, reading, and updating data in MongoDB.
