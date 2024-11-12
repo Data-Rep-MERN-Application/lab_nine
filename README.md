@@ -7,21 +7,9 @@ This lab focuses on adding delete functionality to a MERN (MongoDB, Express.js, 
 1. **Commit and push each solution to GitHub after completing an exercise.**
   
 
-2. **React Application Setup**
-   - If you haven’t completed the previous lab, clone the React application from GitHub:
-     ```bash
-     git clone https://github.com/Data-Rep-MERN-Application/lab_eight
-     ```
-   - Install project dependencies:
-     ```bash
-     cd lab_eight
-     npm install
-     ```
-
----
 
 2. **Set Up the Application**
-   - In the previous lab, you configured a React application to perform CRUD (Create, Read, Update, Delete) operations, including creating, reading, and updating data in MongoDB.
+   - In the previous lab, you configured a React application to perform CRUD (Create, Read, Update) operations, including creating, reading, and updating data in MongoDB.
    - If you did not complete the application in the last lab, clone the [lab solution on GitHub](https://github.com/Data-Rep-MERN-Application/lab_eight):
 
      ```bash
@@ -29,7 +17,7 @@ This lab focuses on adding delete functionality to a MERN (MongoDB, Express.js, 
      cd lab_eight
      npm install
      ```
-
+-----
 3. **Add Delete Functionality**
    - Modify the React and server applications to allow users to delete movies and refresh the movie list.
 
