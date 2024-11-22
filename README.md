@@ -169,12 +169,4 @@ export default Read;
 
 ---
 
-## Key Points
-
-1. **Server-Side Validation**: Ensure the movie exists before deleting it.
-2. **Error Handling**: Handle potential errors, such as network issues or invalid movie IDs.
-3. **Code Modularity**: Pass the `Reload` function as a prop to maintain clean and reusable components.
-
----
-
 By the end of this lab, your application will support deleting movies and dynamically updating the UI. Commit and push your work to GitHub after completing the implementation.
