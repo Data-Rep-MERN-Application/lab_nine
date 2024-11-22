@@ -1,108 +1,186 @@
-# Lab 9: MERN Delete Data Representation and Querying
+### Lab 9: MERN Delete Data Representation and Querying
 
-This lab focuses on adding delete functionality to a MERN (MongoDB, Express.js, React, Node.js) stack application, specifically for managing movies.
-
-## Instructions
-
-1. **Commit and push each solution to GitHub after completing an exercise.**
-  
-
-
-2. **Set Up the Application**
-   - In the previous lab, you configured a React application to perform CRUD (Create, Read, Update) operations, including creating, reading, and updating data in MongoDB.
-   - If you did not complete the application in the last lab, clone the [lab solution on GitHub](https://github.com/Data-Rep-MERN-Application/lab_eight):
-
-     ```bash
-     git clone https://github.com/Data-Rep-MERN-Application/lab_eight
-     cd lab_eight
-     npm install
-     ```
------
-3. **Add Delete Functionality**
-   - Modify the React and server applications to allow users to delete movies and refresh the movie list.
-
-   ### Solution Code
-
-   #### React Changes
-
-   - **In `movieItem.js`**:
-
-     ```javascript
-     import axios from "axios";
-     import Button from 'react-bootstrap/Button';
-
-     <Button variant="danger" onClick={(e) => {
-         e.preventDefault();
-         axios.delete('http://localhost:4000/api/movie/' + props.myMovie._id)
-             .then()
-             .catch();
-     }}>Delete</Button>
-     ```
-
-   #### Server Changes
-
-   - **In `server.js`**:
-
-     ```javascript
-     app.delete('/api/movie/:id', async (req, res) => {
-         console.log('Deleting: ' + req.params.id);
-         let movie = await movieModel.findByIdAndDelete({ _id: req.params.id });
-         res.send(movie);
-     });
-     ```
-
-4. **Refresh the List After Deletion**
-   - After a movie is deleted, the application should refresh the movie list to reflect the changes.
-
-   ### Solution Code
-
-   - **In `movieItem.js`**:
-
-     ```javascript
-     <Button variant="danger" onClick={(e) => {
-         e.preventDefault();
-         axios.delete('http://localhost:4000/api/movie/' + props.myMovie._id)
-             .then((res) => {
-                 let reload = props.Reload();
-             })
-             .catch();
-     }}>Delete</Button>
-     ```
-
-   - **In `movies.js`**:
-
-     ```javascript
-     import MovieItem from "./movieItem";
-
-     function Movies(props) {
-         return props.myMovies.map((movie) => {
-             return <MovieItem myMovie={movie} key={movie._id} Reload={() => { props.ReloadData(); }}></MovieItem>;
-         });
-     }
-
-     export default Movies;
-     ```
-
-   - **In `read.js`**:
-
-     ```javascript
-     const Reload = (e) => {
-         console.log("reloading data");
-         axios.get('http://localhost:4000/api/movies')
-             .then((response) => {
-                 setData(response.data);
-             })
-             .catch((error) => {
-                 console.log(error);
-             });
-     };
-
-     <div>
-         <h2>Hello from Read Component!</h2>
-         <Movies myMovies={data} ReloadData={Reload}></Movies>
-     </div>
-     ```
+This lab provides step-by-step guidance on adding **delete functionality** to a MERN (MongoDB, Express.js, React, Node.js) application for managing movies.
 
 ---
 
-This completes Lab 9, which introduced delete functionality and automatic refresh of the movie list in a MERN stack application.
+## Objectives
+
+1. Implement delete functionality in the **React frontend** and **Node.js backend**.
+2. Automatically refresh the movie list upon successful deletion.
+3. Commit and push your work to GitHub after completing each exercise.
+
+---
+
+## Instructions
+
+### 1. Set Up the Application
+
+- If you completed Lab 8, continue with your existing project.
+- If not, clone the Lab 8 solution repository from GitHub:
+
+```bash
+git clone https://github.com/Data-Rep-MERN-Application/lab_eight
+cd lab_eight
+npm install
+```
+
+Ensure your server and frontend are running.
+
+---
+
+### 2. Add Delete Functionality
+
+#### React Changes
+
+- **Modify `movieItem.js`** to include a delete button for each movie:
+
+```javascript
+import axios from "axios";
+import Button from 'react-bootstrap/Button';
+
+function MovieItem(props) {
+    const handleDelete = (e) => {
+        e.preventDefault();
+        axios.delete('http://localhost:4000/api/movie/' + props.myMovie._id)
+            .then(() => {
+                props.Reload(); // Refresh the movie list after deletion
+            })
+            .catch((error) => {
+                console.error("Error deleting movie:", error);
+            });
+    };
+
+    return (
+        <div>
+            {/* Other movie details */}
+            <Button variant="danger" onClick={handleDelete}>Delete</Button>
+        </div>
+    );
+}
+
+export default MovieItem;
+```
+
+#### Server Changes
+
+- **Update `server.js`** to handle DELETE requests:
+
+```javascript
+app.delete('/api/movie/:id', async (req, res) => {
+    try {
+        console.log('Deleting movie with ID:', req.params.id);
+        const movie = await movieModel.findByIdAndDelete(req.params.id);
+        if (movie) {
+            res.status(200).send({ message: "Movie deleted successfully", movie });
+        } else {
+            res.status(404).send({ message: "Movie not found" });
+        }
+    } catch (error) {
+        console.error("Error deleting movie:", error);
+        res.status(500).send({ error: "An error occurred while deleting the movie." });
+    }
+});
+```
+
+---
+
+### 3. Refresh the List After Deletion
+
+#### React Updates
+
+- **Modify `movies.js`** to pass the `Reload` function as a prop to `MovieItem`:
+
+```javascript
+import MovieItem from "./movieItem";
+
+function Movies(props) {
+    return (
+        <>
+            {props.myMovies.map((movie) => (
+                <MovieItem
+                    myMovie={movie}
+                    key={movie._id}
+                    Reload={props.ReloadData}
+                />
+            ))}
+        </>
+    );
+}
+
+export default Movies;
+```
+
+- **Update `read.js`** to handle data reloading:
+
+```javascript
+import axios from "axios";
+import { useState, useEffect } from "react";
+import Movies from "./movies";
+
+function Read() {
+    const [data, setData] = useState([]);
+
+    const Reload = () => {
+        console.log("Reloading movie data...");
+        axios.get('http://localhost:4000/api/movies')
+            .then((response) => {
+                setData(response.data);
+            })
+            .catch((error) => {
+                console.error("Error reloading data:", error);
+            });
+    };
+
+    useEffect(() => {
+        Reload();
+    }, []);
+
+    return (
+        <div>
+            <h2>Movie List</h2>
+            <Movies myMovies={data} ReloadData={Reload} />
+        </div>
+    );
+}
+
+export default Read;
+```
+
+---
+
+### Explanation of the Code (Sections 2 & 3)
+
+#### **React Changes (`movieItem.js`)**
+- Adds a delete button to each movie, sending a `DELETE` request with the movie's ID to the server.
+- Refreshes the movie list by calling the `Reload` function passed down as a prop.
+
+#### **Server Changes (`server.js`)**
+- Handles `DELETE` requests by removing the specified movie from the MongoDB database.
+- Sends a success or error response based on the outcome of the operation.
+
+#### **Refresh Movie List (`movies.js` and `read.js`)**
+- `movies.js`: Passes the `ReloadData` function to child components so they can trigger a refresh after deletion.
+- `read.js`: Defines and manages the `Reload` function, which fetches updated movie data from the server and updates the state.
+
+---
+
+## Expected Behavior
+
+1. When a user clicks the **Delete** button:
+   - The movie is deleted from the MongoDB database.
+   - The movie list is automatically refreshed to reflect the change.
+
+2. Any errors during the deletion process are logged in the console.
+
+---
+
+## Key Points
+
+1. **Server-Side Validation**: Ensure the movie exists before deleting it.
+2. **Error Handling**: Handle potential errors, such as network issues or invalid movie IDs.
+3. **Code Modularity**: Pass the `Reload` function as a prop to maintain clean and reusable components.
+
+---
+
+By the end of this lab, your application will support deleting movies and dynamically updating the UI. Commit and push your work to GitHub after completing the implementation.
