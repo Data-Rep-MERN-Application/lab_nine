@@ -1,4 +1,4 @@
-### Lab 9: MERN Delete Data Representation and Querying
+# Lab 9: MERN Delete ----  Data Representation and Querying
 
 This lab provides step-by-step guidance on adding **delete functionality** to a MERN (MongoDB, Express.js, React, Node.js) application for managing movies.
 
@@ -68,7 +68,7 @@ export default MovieItem;
 
 ```javascript
 app.delete('/api/movie/:id', async (req, res) => {
-    try {
+  
         console.log('Deleting movie with ID:', req.params.id);
         const movie = await movieModel.findByIdAndDelete(req.params.id);
         if (movie) {
@@ -76,9 +76,6 @@ app.delete('/api/movie/:id', async (req, res) => {
         } else {
             res.status(404).send({ message: "Movie not found" });
         }
-    } catch (error) {
-        console.error("Error deleting movie:", error);
-        res.status(500).send({ error: "An error occurred while deleting the movie." });
     }
 });
 ```
