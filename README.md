@@ -1,4 +1,4 @@
-# Lab 9 Solution: MERN Delete Data Representation and Querying
+# Lab 9: MERN Delete Data Representation and Querying
 
 This lab focuses on adding delete functionality to a MERN (MongoDB, Express.js, React, Node.js) stack application, specifically for managing movies.
 
