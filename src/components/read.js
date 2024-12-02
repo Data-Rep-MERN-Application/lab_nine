@@ -6,8 +6,7 @@ const Read = () => {
 
   const [movies, setMovies] = useState([]);
 
-  useEffect(() => {
-    
+  const ReloadData = ()=>{
     axios.get('http://localhost:4000/api/movies')
       .then((response) => {
         console.log(response.data);
@@ -16,12 +15,17 @@ const Read = () => {
       .catch((error) => {
         console.log(error);
       });
-  });
+  }
+
+  useEffect(() => {
+    ReloadData();
+    
+  },[]);
 
   return (
     <div>
       <h3>Hello from read component!</h3>
-      <Movies myMovies={movies} />
+      <Movies myMovies={movies} ReloadData={ReloadData} />
     </div>
   );
 }

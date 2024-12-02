@@ -1,171 +1,172 @@
+# Lab 9: MERN Delete ----  Data Representation and Querying
 
-# Lab 8: MERN/Update ----  Data Representation and Querying
+This lab provides step-by-step guidance on adding **delete functionality** to a MERN (MongoDB, Express.js, React, Node.js) application for managing movies.
 
-This lab involves tasks related to updating and querying data in a MERN (MongoDB, Express.js, React, Node.js) stack application.
+---
+
+## Objectives
+
+1. Implement delete functionality in the **React frontend** and **Node.js backend**.
+2. Automatically refresh the movie list upon successful deletion.
+3. Commit and push your work to GitHub after completing each exercise.
+
+---
 
 ## Instructions
 
-1. **Commit and push each solution to GitHub after completing an exercise.**
-  
+### 1. Set Up the Application
 
-2. **React Application Setup**
-   - If you haven’t completed the previous lab, clone the React application from GitHub:
-     ```bash
-     git clone https://github.com/Data-Rep-MERN-Application/lab_seven
-     ```
-   - Install project dependencies:
-     ```bash
-     npm install
-     ```
+- If you completed Lab 8, continue with your existing project.
+- If not, clone the Lab 8 solution repository from GitHub:
+
+```bash
+git clone https://github.com/Data-Rep-MERN-Application/lab_eight
+cd lab_eight
+npm install
+```
+
+Ensure your server and frontend are running.
 
 ---
 
-3. **Add Edit Functionality**
-   - Add functionality to allow users to edit movies. When a user clicks the "Edit" button, a new window will open where they can modify movie information. Use the following code to create a functional `Edit.js` component.
+### 2. Add Delete Functionality
 
-   - Explanation of `useParams` and `useNavigate`
-   
-   - **`useParams`**: This hook is provided by React Router and allows you to access the dynamic parameters of the current route. In this case, `useParams` is used to get the `id` of the movie from the URL, allowing us to retrieve the specific movie data from the database. This makes it possible to load and edit details for a single, specific movie.
+#### React Changes
 
-   - **`useNavigate`**: This hook, also provided by React Router, returns a function that enables navigation to different routes programmatically. Here, it is used after the user submits the edited movie information. Once the update is saved, `useNavigate` is called to redirect the user back to the "read" page where they can view all movies, including the one they just edited.
+- **Modify `movieItem.js`** to include a delete button for each movie:
 
-   ### Client Side change
-- create `edit.js` to handle editing movies.
-  
-   ```javascript
-   
-    import React from 'react';
-    import { useParams } from 'react-router-dom';
-    import { useState, useEffect } from 'react';
-    import axios from 'axios';
-    import { useNavigate } from "react-router-dom";
+```javascript
+import axios from "axios";
+import Button from 'react-bootstrap/Button';
 
-    export default function Edit(props) {
-      let { id } = useParams();
-      const [title, setTitle] = useState("");
-      const [year, setYear] = useState("");
-      const [poster, setPoster] = useState("");
-      const navigate = useNavigate();
-
-    useEffect(() => {
-        axios.get('http://localhost:4000/api/movie/' + id)
-            .then((response) => {
-                setTitle(response.data.title);
-                setYear(response.data.year);
-                setPoster(response.data.poster);
+function MovieItem(props) {
+    const handleDelete = (e) => {
+        e.preventDefault();
+        axios.delete('http://localhost:4000/api/movie/' + props.myMovie._id)
+            .then(() => {
+                props.Reload(); // Refresh the movie list after deletion
             })
             .catch((error) => {
-                console.log(error);
+                console.error("Error deleting movie:", error);
             });
-    }, [id]);
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const newMovie = { id, title, year, poster };
-        axios.put('http://localhost:4000/api/movie/' + id, newMovie)
-            .then((res) => {
-                console.log(res.data);
-                navigate('/read');
-            });
-    }
+    };
 
     return (
         <div>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Movie Title: </label>
-                    <input type="text" 
-                    className="form-control" 
-                    value={title} 
-                    onChange={(e) => setTitle(e.target.value)} />
-                </div>
-                <div className="form-group">
-                    <label>Release Year: </label>
-                    <input type="text" 
-                    className="form-control" 
-                    value={year} 
-                    onChange={(e) => setYear(e.target.value)} />
-                </div>
-                <div className="form-group">
-                    <label>Poster URL: </label>
-                    <input type="text" 
-                    className="form-control" 
-                    value={poster} 
-                    onChange={(e) => setPoster(e.target.value)} />
-                </div>
-                <div className="form-group">
-                    <input type="submit" value="Edit Movie" className="btn btn-primary" />
-                </div>
-            </form>
+            {/* Other movie details */}
+            <Button variant="danger" onClick={handleDelete}>Delete</Button>
         </div>
     );
+}
+
+export default MovieItem;
+```
+
+#### Server Changes
+
+- **Update `server.js`** to handle DELETE requests:
+
+```javascript
+app.delete('/api/movie/:id', async (req, res) => {
+  
+        console.log('Deleting movie with ID:', req.params.id);
+        const movie = await movieModel.findByIdAndDelete(req.params.id);
+        res.status(200).send({ message: "Movie deleted successfully", movie });
+        
     }
-   ```
-
-
-
-### Changes in `App.js`
-
-   ```javascript
-   <Route path='/edit/:id' element={<Edit />} />
-   ```
-
-   - **Purpose**: This line adds a new route to the application’s router configuration. The route allows users to navigate to the `Edit` component when they want to edit a specific movie.
-   
-   - **Explanation**:
-     - **`path='/edit/:id'`**: The `:id` portion is a URL parameter that represents the unique ID of the movie the user wants to edit. When navigating to this path, React Router will capture the `id` from the URL and pass it to the `Edit` component through the `useParams` hook, allowing the component to fetch and update the correct movie data.
-     - **`element={<Edit />}`**: This specifies that the `Edit` component should be rendered when the route `/edit/:id` is visited. By associating this route with the `Edit` component, the app can display the edit form for the selected movie.
-
-### Changes in `movieItem.js`
-
-   ```javascript
-   import { Link } from 'react-router-dom';
-   <Link to={"/edit/" + props.mymovie._id} className="btn btn-primary">Edit</Link>
-   ```
-
-   - **Purpose**: This code snippet adds an "Edit" button to each movie item, allowing users to navigate to the edit page for that specific movie.
-
-   - **Explanation**:
-     - **`import { Link } from 'react-router-dom';`**: `Link` is a component from React Router that lets you navigate to a new route without refreshing the page. It is used to create in-app navigation.
-     - **`to={"/edit/" + props.mymovie._id}`**: This `to` attribute defines the path the `Link` component should navigate to when clicked. Here, it’s dynamically constructed using the base path `/edit/` followed by the unique movie ID, `props.myMovie._id`. This URL structure matches the route defined in `App.js` (`/edit/:id`) and allows React Router to capture the movie’s ID and pass it to the `Edit` component.
-     
-
-Together, these changes in `App.js` and `movieItem.js` allow the user to navigate to an edit page for each movie, where the specific movie data can be loaded and updated. The `Link` in `movieItem.js` generates the correct path with the movie ID, and the route in `App.js` ensures that the `Edit` component is rendered when that path is visited.
-
-
-
-## Server-Side Changes
-
-In `server.js`, two new routes are added to support editing movie data:
-
-1. **GET `/api/movie/:id`**: This route fetches a specific movie by its ID. It’s used to retrieve the current movie details, which are shown in the edit form. The `:id` parameter represents the movie’s unique identifier. The server looks up this movie in the database and sends its details back to the client.
-
-   ```javascript
-   app.get('/api/movie/:id', async (req, res) => {
-       let movie = await movieModel.findById({ _id: req.params.id });
-       res.send(movie);
-   });
-   ```
-
-2. **PUT `/api/movie/:id`**: This route updates a specific movie’s information. When the user submits the edited data, this route takes the updated details from `req.body` and updates the movie in the database. The server then returns the updated movie details to confirm the change.
-
-   ```javascript
-   app.put('/api/movie/:id', async (req, res) => {
-       let movie = await movieModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-       res.send(movie);
-   });
-   ```
-
+});
+```
 
 ---
-## Summary
 
-In this lab, you learned how to extend a MERN stack application to support updating data in a MongoDB database. Specifically, you:
+### 3. Refresh the List After Deletion
 
-- Created a new functional component in React to allow users to edit movie details.
-- Utilized the `useParams` hook to capture dynamic parameters from the URL.
-- Used `useState` and `useEffect` to manage component state and perform data fetching and updating.
-- Employed `axios` for HTTP requests to retrieve and update movie data.
-- Configured Express routes on the server side to handle `PUT` requests for updating movies in the MongoDB database.
+#### React Updates
 
-This lab reinforced core concepts of CRUD operations within the MERN stack and improved your understanding of handling data updates in a full-stack application.
+- **Modify `movies.js`** to pass the `Reload` function as a prop to `MovieItem`:
+
+```javascript
+import MovieItem from "./movieItem";
+
+function Movies(props) {
+    return (
+        <>
+            {props.myMovies.map((movie) => (
+                <MovieItem
+                    myMovie={movie}
+                    key={movie._id}
+                    Reload={props.ReloadData}
+                />
+            ))}
+        </>
+    );
+}
+
+export default Movies;
+```
+
+- **Update `read.js`** to handle data reloading:
+
+```javascript
+import axios from "axios";
+import { useState, useEffect } from "react";
+import Movies from "./movies";
+
+function Read() {
+    const [data, setData] = useState([]);
+
+    const Reload = () => {
+        console.log("Reloading movie data...");
+        axios.get('http://localhost:4000/api/movies')
+            .then((response) => {
+                setData(response.data);
+            })
+            .catch((error) => {
+                console.error("Error reloading data:", error);
+            });
+    };
+
+    useEffect(() => {
+        Reload();
+    }, []);
+
+    return (
+        <div>
+            <h2>Movie List</h2>
+            <Movies myMovies={data} ReloadData={Reload} />
+        </div>
+    );
+}
+
+export default Read;
+```
+
+---
+
+### Explanation of the Code (Sections 2 & 3)
+
+#### **React Changes (`movieItem.js`)**
+- Adds a delete button to each movie, sending a `DELETE` request with the movie's ID to the server.
+- Refreshes the movie list by calling the `Reload` function passed down as a prop.
+
+#### **Server Changes (`server.js`)**
+- Handles `DELETE` requests by removing the specified movie from the MongoDB database.
+- Sends a success or error response based on the outcome of the operation.
+
+#### **Refresh Movie List (`movies.js` and `read.js`)**
+- `movies.js`: Passes the `ReloadData` function to child components so they can trigger a refresh after deletion.
+- `read.js`: Defines and manages the `Reload` function, which fetches updated movie data from the server and updates the state.
+
+---
+
+## Expected Behavior
+
+1. When a user clicks the **Delete** button:
+   - The movie is deleted from the MongoDB database.
+   - The movie list is automatically refreshed to reflect the change.
+
+2. Any errors during the deletion process are logged in the console.
+
+---
+
+By the end of this lab, your application will support deleting movies and dynamically updating the UI. Commit and push your work to GitHub after completing the implementation.
