@@ -1,9 +1,10 @@
 
-# Lab 7: Mongo/MERN --- Data Representation and Querying
 
-The following exercises focus on utilizing MongoDB within a MERN stack.
+# Lab 8: MERN/Update ----  Data Representation and Querying
 
-### Instructions
+This lab involves tasks related to updating and querying data in a MERN (MongoDB, Express.js, React, Node.js) stack application.
+
+## Instructions
 
 1. **Commit and push each solution to GitHub after completing an exercise.**
   
@@ -11,104 +12,161 @@ The following exercises focus on utilizing MongoDB within a MERN stack.
 2. **React Application Setup**
    - If you haven’t completed the previous lab, clone the React application from GitHub:
      ```bash
-     git clone https://github.com/Data-Rep-MERN-Application/lab_six
+     git clone https://github.com/Data-Rep-MERN-Application/lab_seven
      ```
    - Install project dependencies:
      ```bash
      npm install
      ```
 
-3. **MongoDB Setup**
+---
 
-   **NoSQL** is a type of database that provides a flexible and scalable alternative to traditional relational databases. Unlike SQL databases, which rely on tables and structured schemas, NoSQL databases store data in various formats, such as documents, key-value pairs,       graphs, or wide-column stores. This flexibility makes NoSQL databases ideal for handling large volumes of unstructured or semi-structured data and allows for more dynamic scaling, especially for applications with rapidly changing data needs.
+3. **Add Edit Functionality**
+   - Add functionality to allow users to edit movies. When a user clicks the "Edit" button, a new window will open where they can modify movie information. Use the following code to create a functional `Edit.js` component.
 
-   **MongoDB** is a popular NoSQL database known for its document-based storage model. Rather than using rows and tables, MongoDB stores data in JSON-like documents, where each document is a self-contained object with key-value pairs. This model is both flexible and     
-   powerful, allowing for complex, nested data structures and rapid data retrieval. MongoDB’s scalability and ease of use make it well-suited for modern web applications, especially those built with the MERN stack (MongoDB, Express, React, Node.js).
-
-   - (a) Create a free MongoDB account and cluster at [MongoDB Atlas](https://www.mongodb.com/).
-   - (b) Allow all IP addresses to connect.
-   - (c) Create a simple user (e.g., `admin` with password `admin`) for database access.
-
-4. **Database Connection with Mongoose**
-
-   Mongoose is an Object Data Modeling (ODM) library for MongoDB and Node.js. It provides a schema-based solution for modeling application data, allowing developers to enforce structure, handle data relationships, and perform CRUD operations (Create, Read, Update, Delete) more easily. By defining models for each data type, Mongoose ensures data consistency and helps simplify database interactions.
-   - Install the Mongoose library:
-     ```bash
-     npm install mongoose
-     ```
-   - Connect to MongoDB in `server.js`:
-     ```javascript
-     import mongoose from 'mongoose';
-     mongoose.connect('my_db_connection_string');
-     ```
-
-5. **Create a Data Model**
-
-      In Mongoose, a **data model** is a blueprint for defining the structure of data within a MongoDB collection. Models are created from **schemas**, which specify the fields, data types, and constraints for each document in a collection. This schema-based approach 
-      ensures consistency in the way data is stored and accessed, making it easier to validate and manage data across an application.
-
-      For example, defining a schema for a "Movie" model allows you to enforce specific fields like title, year, and poster for each movie document. By setting up a model in Mongoose, you can use it to create, read, update, and delete documents in MongoDB, with Mongoose handling many details behind the scenes.
-    - Define schema and data model:
-     ```javascript
-       const movieSchema = new mongoose.Schema({
-         title: String,
-         year: String,
-         poster: String
-       });
-      
-       const Movie = mongoose.model('Movie', movieSchema);
-     ```
-
-6. **Add Data to MongoDB**
-   - Create a method to add new movie records:
-     ```javascript
-      app.post('/api/movies', async (req, res)=>{
-
-      const { title, year, poster } = req.body;
-
-      const newMovie = new Movie({ title, year, poster });
-      await newMovie.save();
-  
-      res.status(201).json({ message: 'Movie created successfully', movie: newMovie });
-      })
-     ```
-     
-   **Explanation**:
-   - **async** and **await** are used to handle asynchronous operations like saving data to a database.
-   - async allows us to use await, which pauses the function until the operation completes. Here, await newMovie.save() ensures the movie is saved to the database before continuing, making the code easier to read and manage.  
-   - `app.post('/api/movies', ...)`: This sets up a POST route at `/api/movies`, which will be used to add new movies.
-   - We extract `title`, `year`, and `poster` from `req.body`, the data sent in the POST request.
-   - A new `Movie` instance is created using `new Movie({ title, year, poster })`.
-   - `newMovie.save()` saves the new movie to MongoDB, and a success response is sent with the movie data.
-
-
-7. **Retrieve All Data**
-   - Implement a method to fetch all movie records:
-     ```javascript
-     app.get('/api/movies', async (req, res) => {
-       const movies = await Movie.find({});
-       res.json(movies);
-     });
-     ```
-     
-   **Explanation**:
+   - Explanation of `useParams` and `useNavigate`
    
-   - `app.get('/api/movies', ...)`: Sets up a GET route at `/api/movies`, which will return all movies.
-   - `Movie.find({})` is called. The empty object `{}` as an argument means it fetches all documents in the `movies` collection.
-   - `res.json(movies)` sends the retrieved movies in JSON format back to the client.
+   - **`useParams`**: This hook is provided by React Router and allows you to access the dynamic parameters of the current route. In this case, `useParams` is used to get the `id` of the movie from the URL, allowing us to retrieve the specific movie data from the database. This makes it possible to load and edit details for a single, specific movie.
 
+   - **`useNavigate`**: This hook, also provided by React Router, returns a function that enables navigation to different routes programmatically. Here, it is used after the user submits the edited movie information. Once the update is saved, `useNavigate` is called to redirect the user back to the "read" page where they can view all movies, including the one they just edited.
 
-8. **Retrieve Data by ID**
-   - Create a method to retrieve a specific movie by its ID:
-     ```javascript
-     app.get('/api/movie/:id', async (req, res) => {
-       const movie = await Movie.findById(req.params.id);
-       res.send(movie);
-     });
-     ```
-     
-    **Explanation**:
+   ### Client Side change
+- create `edit.js` to handle editing movies.
   
-     - `app.get('/api/movie/:id', ...)`: Defines a GET route at `/api/movie/:id`, where `:id` is a parameter for the movie’s unique ID.
-     - `Movie.findById(req.params.id)`: This method searches the `movies` collection for a document with the ID provided in the URL.
-     - If a movie is found, it’s sent back in JSON format.
+   ```javascript
+   
+    import React from 'react';
+    import { useParams } from 'react-router-dom';
+    import { useState, useEffect } from 'react';
+    import axios from 'axios';
+    import { useNavigate } from "react-router-dom";
+
+    export default function Edit(props) {
+      let { id } = useParams();
+      const [title, setTitle] = useState("");
+      const [year, setYear] = useState("");
+      const [poster, setPoster] = useState("");
+      const navigate = useNavigate();
+
+    useEffect(() => {
+        axios.get('http://localhost:3000/api/movie/' + id)
+            .then((response) => {
+                setTitle(response.data.title);
+                setYear(response.data.year);
+                setPoster(response.data.poster);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, [id]);
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const newMovie = { id, title, year, poster };
+        axios.put('http://localhost:4000/api/movie/' + id, newMovie)
+            .then((res) => {
+                console.log(res.data);
+                navigate('/read');
+            });
+    }
+
+    return (
+        <div>
+            <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label>Movie Title: </label>
+                    <input type="text" 
+                    className="form-control" 
+                    value={title} 
+                    onChange={(e) => setTitle(e.target.value)} />
+                </div>
+                <div className="form-group">
+                    <label>Release Year: </label>
+                    <input type="text" 
+                    className="form-control" 
+                    value={year} 
+                    onChange={(e) => setYear(e.target.value)} />
+                </div>
+                <div className="form-group">
+                    <label>Poster URL: </label>
+                    <input type="text" 
+                    className="form-control" 
+                    value={poster} 
+                    onChange={(e) => setPoster(e.target.value)} />
+                </div>
+                <div className="form-group">
+                    <input type="submit" value="Edit Movie" className="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    );
+    }
+   ```
+
+
+
+### Changes in `App.js`
+
+   ```javascript
+   <Route path='/edit/:id' element={<Edit />} />
+   ```
+
+   - **Purpose**: This line adds a new route to the application’s router configuration. The route allows users to navigate to the `Edit` component when they want to edit a specific movie.
+   
+   - **Explanation**:
+     - **`path='/edit/:id'`**: The `:id` portion is a URL parameter that represents the unique ID of the movie the user wants to edit. When navigating to this path, React Router will capture the `id` from the URL and pass it to the `Edit` component through the `useParams` hook, allowing the component to fetch and update the correct movie data.
+     - **`element={<Edit />}`**: This specifies that the `Edit` component should be rendered when the route `/edit/:id` is visited. By associating this route with the `Edit` component, the app can display the edit form for the selected movie.
+
+### Changes in `movieItem.js`
+
+   ```javascript
+   import { Link } from 'react-router-dom';
+   <Link to={"/edit/" + props.mymovie._id} className="btn btn-primary">Edit</Link>
+   ```
+
+   - **Purpose**: This code snippet adds an "Edit" button to each movie item, allowing users to navigate to the edit page for that specific movie.
+
+   - **Explanation**:
+     - **`import { Link } from 'react-router-dom';`**: `Link` is a component from React Router that lets you navigate to a new route without refreshing the page. It is used to create in-app navigation.
+     - **`to={"/edit/" + props.mymovie._id}`**: This `to` attribute defines the path the `Link` component should navigate to when clicked. Here, it’s dynamically constructed using the base path `/edit/` followed by the unique movie ID, `props.myMovie._id`. This URL structure matches the route defined in `App.js` (`/edit/:id`) and allows React Router to capture the movie’s ID and pass it to the `Edit` component.
+     
+
+Together, these changes in `App.js` and `movieItem.js` allow the user to navigate to an edit page for each movie, where the specific movie data can be loaded and updated. The `Link` in `movieItem.js` generates the correct path with the movie ID, and the route in `App.js` ensures that the `Edit` component is rendered when that path is visited.
+
+
+
+## Server-Side Changes
+
+In `server.js`, two new routes are added to support editing movie data:
+
+1. **GET `/api/movie/:id`**: This route fetches a specific movie by its ID. It’s used to retrieve the current movie details, which are shown in the edit form. The `:id` parameter represents the movie’s unique identifier. The server looks up this movie in the database and sends its details back to the client.
+
+   ```javascript
+   app.get('/api/movie/:id', async (req, res) => {
+       let movie = await Movie.findById({ _id: req.params.id });
+       res.send(movie);
+   });
+   ```
+
+2. **PUT `/api/movie/:id`**: This route updates a specific movie’s information. When the user submits the edited data, this route takes the updated details from `req.body` and updates the movie in the database. The server then returns the updated movie details to confirm the change.
+
+   ```javascript
+   app.put('/api/movie/:id', async (req, res) => {
+       let movie = await Movie.findByIdAndUpdate(req.params.id, req.body, { new: true });
+       res.send(movie);
+   });
+   ```
+
+
+---
+## Summary
+
+In this lab, you learned how to extend a MERN stack application to support updating data in a MongoDB database. Specifically, you:
+
+- Created a new functional component in React to allow users to edit movie details.
+- Utilized the `useParams` hook to capture dynamic parameters from the URL.
+- Used `useState` and `useEffect` to manage component state and perform data fetching and updating.
+- Employed `axios` for HTTP requests to retrieve and update movie data.
+- Configured Express routes on the server side to handle `PUT` requests for updating movies in the MongoDB database.
+
+This lab reinforced core concepts of CRUD operations within the MERN stack and improved your understanding of handling data updates in a full-stack application.

@@ -7,7 +7,12 @@ const Read = () => {
     useEffect(
         () => {
             //do some http client work
-            axios.get('http://localhost:3000/api/movies')
+            axios.get('http://localhost:3000/api/movies',{
+                headers: {
+                    'X-Martin-Header': 'some value',
+                    'Content-Type': 'application/json'
+                }
+            })
                 .then((response) => {
                     console.log(response.data.myArray);
                     setMovie(response.data.myArray);

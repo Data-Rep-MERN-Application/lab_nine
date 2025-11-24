@@ -12,6 +12,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Read from './components/read';
 import Create from './components/create';
+import Edit from './components/edit';
 function App() {
   const [count, setCount] = useState(0)
 
@@ -33,6 +34,7 @@ function App() {
           <Route path='/' element={<Content></Content>}></Route>
           <Route path='/read' element={<Read />}></Route>
           <Route path='/create' element={<Create />}></Route>
+          <Route path ='/edit/:id' element={<Edit></Edit>}></Route>
         </Routes>
       </BrowserRouter>
     </>

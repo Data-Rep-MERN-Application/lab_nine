@@ -33,33 +33,14 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/movies', async (req, res) => {
-  // const myMovies = [
-  //   {
-  //     "Title": "Avengers: Infinity War (server)",
-  //     "Year": "2018",
-  //     "imdbID": "tt4154756",
-  //     "Type": "movie",
-  //     "Poster": "https://m.media-amazon.com/images/M/MV5BMjMxNjY2MDU1OV5BMl5BanBnXkFtZTgwNzY1MTUwNTM@._V1_SX300.jpg"
-  //   },
-  //   {
-  //     "Title": "Captain America: Civil War (server)",
-  //     "Year": "2016",
-  //     "imdbID": "tt3498820",
-  //     "Type": "movie",
   //     "Poster": "https://m.media-amazon.com/images/M/MV5BMjQ0MTgyNjAxMV5BMl5BanBnXkFtZTgwNjUzMDkyODE@._V1_SX300.jpg"
-  //   },
-  //   {
-  //     "Title": "World War Z (server)",
-  //     "Year": "2013",
-  //     "imdbID": "tt0816711",
-  //     "Type": "movie",
-  //     "Poster": "https://m.media-amazon.com/images/M/MV5BNDQ4YzFmNzktMmM5ZC00MDZjLTk1OTktNDE2ODE4YjM2MjJjXkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SX300.jpg"
-  //   }
-  // ]
- const movies = await movieModel.find({});
-  res.json({myArray:movies});
 
-  
+  const movies = await movieModel.find({});
+  const Martin = req.header('X-Martin-Header');
+  console.log('Received X-Martin-Header:', Martin);
+  res.json({ myArray: movies });
+
+
 })
 
 
@@ -69,7 +50,7 @@ app.post('/api/movies', async (req, res) => {
 
   const newMovie = new movieModel({ title, year, poster });
   await newMovie.save();
-  console.log('Movie saved:', newMovie);  
+  console.log('Movie saved:', newMovie);
   res.status(201).json({ message: 'Movie created successfully', movie: newMovie });
 })
 
@@ -79,6 +60,11 @@ app.get('/api/movie/:id', async (req, res) => {
   res.send(movie);
 });
 
+app.put('/api/movie/:id', async (req, res) => {
+  const { title, year, poster } = req.body;
+  const updatedMovie = await movieModel.findByIdAndUpdate(req.params.id, { title, year, poster }, { new: true });
+  res.json(updatedMovie);
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
