@@ -26,7 +26,7 @@ const movieSchema = new mongoose.Schema({
   poster: String
 });
 
-const movieModel = mongoose.model('Movie', movieSchema);
+const movieModel = mongoose.model('sdfgsdfgsdfg', movieSchema);
 
 app.get('/', (req, res) => {
   res.send('Hello World');
@@ -54,6 +54,12 @@ app.post('/api/movies', async (req, res) => {
   res.status(201).json({ message: 'Movie created successfully', movie: newMovie });
 })
 
+app.delete('/api/movies/:id', async(req, res) => {
+  console.log('Deleting movie with id:', req.params.id);
+  const movie = await movieModel.findByIdAndDelete(req.params.id)
+  console.log('Movie deleted:', movie);
+  res.json({message: 'Movie deleted successfully', movie: movie});
+})
 
 app.get('/api/movie/:id', async (req, res) => {
   const movie = await movieModel.findById(req.params.id);
