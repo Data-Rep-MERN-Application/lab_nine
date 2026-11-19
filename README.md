@@ -15,12 +15,12 @@ This lab provides step-by-step guidance on adding **delete functionality** to a 
 
 ### 1. Set Up the Application
 
-- If you completed Lab 8, continue with your existing project.
-- If not, clone the Lab 8 solution repository from GitHub:
+- If you completed Lab 7, continue with your existing project.
+- If not, clone the Lab 7 solution repository from GitHub:
 
 ```bash
-git clone https://github.com/Data-Rep-MERN-Application/lab_eight
-cd lab_eight
+git clone https://github.com/Data-Rep-MERN-Application/lab_seven
+cd lab_seven
 npm install
 ```
 
